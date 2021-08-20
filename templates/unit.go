@@ -11,8 +11,8 @@ Description={{.Description}}
 ExecStart={{.Path}}
 Type={{.Type}}	
 WorkingDirectory={{.WorkingDirectory}}
-User=root
-Group=root
+User={{.User}}
+Group={{.Group}}
 
 [Install]
 WantedBy=multi-user.target`

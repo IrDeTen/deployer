@@ -81,6 +81,14 @@ loop:
 		errVBox.Print(err.Error())
 	}
 	clearConsole()
+	status := exec.Command("systemctl", "status", service.Name)
+	stdout, err := status.Output()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	sVBox.Print(string(stdout))
+
 	dVBox.Print("New service created")
 	fmt.Scan(&text)
 	if strings.Contains(text, "--exit") {

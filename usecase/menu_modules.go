@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"fmt"
+	"os/exec"
 	"strings"
 
 	"github.com/IrDeTen/deployer/models"
@@ -16,8 +17,8 @@ var modules map[string]func(*models.Service) bool = map[string]func(*models.Serv
 	"06 after services":    setAfterServices,
 	"07 required services": setReqServices,
 	"08 restart":           setRestart,
-	//"09 user":              setUser,
-	//"10 group":             setGroup,
+	"09 user":              setUser,
+	"10 group":             setGroup,
 }
 
 func setName(service *models.Service) bool {
@@ -256,11 +257,62 @@ func setRestart(service *models.Service) bool {
 	return false
 }
 
-//TODO add modules for User and Group
-/*func setUser(service *models.Service) bool {
-
+func setUser(service *models.Service) bool {
+	var text string
+	clearConsole()
+	getUsers := exec.Command("cut", "-d:", "-f1", "/etc/passwd")
+	stdOut, err := getUsers.Output()
+	if err != nil {
+		clearConsole()
+		errVBox.Print(err.Error())
+	}
+	for {
+		dVBox.Print(service.FormString())
+		sVBox.Print("Select user for running srevice:\n" + string(stdOut))
+		fmt.Scan(&text)
+		if text == "--exit" {
+			clearConsole()
+			return true
+		}
+		if len(text) == 0 {
+			clearConsole()
+			errVBox.Print("User name is blank")
+			continue
+		}
+		service.User = text
+		break
+	}
+	return false
 }
 
 func setGroup(service *models.Service) bool {
-
-}*/
+	var text string
+	clearConsole()
+	getGroups := exec.Command("groups", service.User)
+	stdOut, err := getGroups.Output()
+	if err != nil {
+		clearConsole()
+		errVBox.Print(err.Error())
+	}
+	groups := strings.Split(
+		strings.Split(string(stdOut), " : ")[1],
+		"\n",
+	)
+	for {
+		dVBox.Print(service.FormString())
+		sVBox.Print("Select user for running srevice:\n" + strings.Join(groups, "\n"))
+		fmt.Scan(&text)
+		if text == "--exit" {
+			clearConsole()
+			return true
+		}
+		if len(text) == 0 {
+			clearConsole()
+			errVBox.Print("User name is blank")
+			continue
+		}
+		service.Group = text
+		break
+	}
+	return false
+}
